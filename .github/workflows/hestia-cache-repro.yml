@@ -56,16 +56,9 @@ jobs:
             fi
           done
 
-      - name: Build patched Hestia
-        run: |
-          set -euxo pipefail
-          nix build github:nealol/hestia# \
-            --out-link ./patched-hestia
-          cp ./patched-hestia/bin/hestia ./hestia
-
-      - uses: Mic92/hestia@v1
+      - uses: nealol/hestia@1.0.4-blacksmith.1
         with:
-          binary: ./hestia
+          version: 1.0.4-blacksmith.1
           drain-timeout: 600
           upstream-cache-filter: true
 
