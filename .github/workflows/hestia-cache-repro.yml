@@ -13,16 +13,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Cheap baseline: GitHub's real cache backend.
           - name: github-ubuntu-x64
             runner: ubuntu-latest
 
-          # Blacksmith's Linux cache path.
           - name: blacksmith-ubuntu-x64
             runner: blacksmith-2vcpu-ubuntu-2404
 
-          # Exact-ish reproduction for your aarch64-darwin log.
-          # GitHub macos-15 is arm64; Blacksmith macos-15 is Apple Silicon.
           - name: github-macos-arm
             runner: macos-15
 
@@ -51,23 +47,14 @@ jobs:
           nix --version
           nix eval --raw --impure --expr 'builtins.currentSystem'
 
-          python3 - <<'PY'
-import os
-import urllib.parse
-
-for name in [
-    "ACTIONS_RESULTS_URL",
-    "ACTIONS_CACHE_URL",
-    "ACTIONS_RUNTIME_URL",
-]:
-    value = os.environ.get(name)
-    if not value:
-        print(f"{name}=<unset>")
-    else:
-        parsed = urllib.parse.urlparse(value)
-        print(f"{name}.scheme={parsed.scheme}")
-        print(f"{name}.netloc={parsed.netloc}")
-PY
+          for name in ACTIONS_RESULTS_URL ACTIONS_CACHE_URL ACTIONS_RUNTIME_URL; do
+            value="${!name:-}"
+            if [ -z "$value" ]; then
+              echo "$name=<unset>"
+            else
+              echo "$name=$value"
+            fi
+          done
 
       - uses: Mic92/hestia@v1
         with:
